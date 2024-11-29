@@ -9,6 +9,18 @@ from datetime import datetime
 CONFIG_PATH = "config.json"
 
 def load_config(config_path):
+    default_config = {
+        "port": 6667,
+        "welcome_message": "Welcome to server!\nUse /username <username> to login.\n",
+        "db_path": "chat_server.db"
+    }
+
+    if not os.path.exists(config_path):
+        with open(config_path, 'w') as f:
+            json.dump(default_config, f, indent=4)
+        print(f"Configuration file not found. Created default configuration at {config_path}.")
+        return default_config
+
     with open(config_path, 'r') as f:
         return json.load(f)
 
