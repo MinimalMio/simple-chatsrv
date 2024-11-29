@@ -153,8 +153,27 @@ class ChatServer(socketserver.BaseRequestHandler):
                 del self.clients[self.username]
         self.request.close()
 
-if __name__ == "__main__":
+def run_server():
     HOST, PORT = "0.0.0.0", config['port']
     server = socketserver.ThreadingTCPServer((HOST, PORT), ChatServer)
-    print(f"Server running on port {PORT}")
-    server.serve_forever()
+    print(f"Server started on port {PORT}. Type /quit to stop the server.")
+    
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.daemon = True
+    server_thread.start()
+
+    try:
+        while True:
+            user_input = input()
+            if user_input.strip().lower() == "/quit":
+                print("Shutting down the server...")
+                server.shutdown()
+                break
+    except KeyboardInterrupt:
+        print("\nServer interrupted. Shutting down...")
+        server.shutdown()
+    finally:
+        server.server_close() 
+
+if __name__ == "__main__":
+    run_server()
