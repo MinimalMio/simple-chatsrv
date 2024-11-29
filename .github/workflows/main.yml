@@ -31,14 +31,14 @@ jobs:
         with:
           python-version: 3.8
 
-      # Install dependencies (Linux/Windows specific)
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m venv venv
           ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
           pip install -r requirements.txt
 
-      # Install pyinstaller
+      # Install PyInstaller
       - name: Install PyInstaller
         run: |
           ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
@@ -48,13 +48,13 @@ jobs:
       - name: Build executable
         run: |
           ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
-          pyinstaller --onefile server.py --name chat_server_${{ matrix.os }}_${{ matrix.arch }}
+          pyinstaller --onefile server.py --name chat_server
         env:
           ARCHFLAGS: '-arch ${{ matrix.arch }}'
 
       # Upload artifacts
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: chat_server_${{ matrix.os }}_${{ matrix.arch }}
-          path: dist/chat_server_${{ matrix.os }}_${{ matrix.arch }}
+          path: dist/chat_server${{ matrix.os == 'windows-latest' && '.exe' || '' }}
