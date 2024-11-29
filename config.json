@@ -1,0 +1,6 @@
+{
+  "port": 6667,
+  "welcome_message": "Welcome to server!\nUse /username <username> to login.\n",
+  "db_path": "chat_server.db"
+}
+
