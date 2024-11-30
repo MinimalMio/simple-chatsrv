@@ -1,0 +1,60 @@
+name: Build Chat Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Executables
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        arch: [x86_64, arm64]
+        exclude:
+          - os: windows-latest
+            arch: arm64
+
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
+          pip install -r requirements.txt
+
+      # Install PyInstaller
+      - name: Install PyInstaller
+        run: |
+          ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
+          pip install pyinstaller
+
+      # Build executable
+      - name: Build executable
+        run: |
+          ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
+          pyinstaller --onefile server.py --name chat_server
+        env:
+          ARCHFLAGS: '-arch ${{ matrix.arch }}'
+
+      # Upload artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: chat_server_${{ matrix.os }}_${{ matrix.arch }}
+          path: dist/chat_server${{ matrix.os == 'windows-latest' && '.exe' || '' }}
